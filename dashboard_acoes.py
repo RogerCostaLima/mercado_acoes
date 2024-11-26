@@ -3,12 +3,12 @@ import pandas as pd
 import yfinance as yf
 import plotly.express as px
 import datetime
+import time
 
 # Configuração inicial do Streamlit
 st.set_page_config(page_title="Dashboard de Ações", layout="wide", page_icon="📈")
 
-# Função para carregar os dados com cache atualizado
-@st.cache_data
+# Função para carregar os dados atualizados
 def carregar_dados(tickers):
     dados = []
     for ticker in tickers:
@@ -16,6 +16,11 @@ def carregar_dados(tickers):
         df['Ticker'] = ticker  # Adiciona a coluna do ticker para identificar a empresa
         dados.append(df)
     return pd.concat(dados)
+
+# Função para atualizar os dados automaticamente
+def atualizar_dados():
+    # Força o recarregamento dos dados
+    return carregar_dados(tickers)
 
 # Título do Dashboard
 st.title("📈 Dashboard de Mercado de Ações")
@@ -32,6 +37,15 @@ tickers = [ticker.strip() for ticker in lista_tickers.split(",")]
 # Carregar os dados das ações
 st.sidebar.write("### 📥 Carregando dados...")
 empresas = carregar_dados(tickers)
+
+# Atualização em tempo real
+st.sidebar.write("🔄 **Atualização Automática**")
+auto_update = st.sidebar.checkbox("Ativar atualização automática (a cada 60 segundos)")
+
+if auto_update:
+    st.sidebar.warning("🔔 O dashboard será atualizado a cada 60 segundos.")
+    time.sleep(60)  # Pausa para atualização
+    empresas = atualizar_dados()
 
 # Seção principal - Filtros e KPIs
 st.sidebar.header("📊 Filtros de Visualização")
